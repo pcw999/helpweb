@@ -19,9 +19,9 @@ def home():
         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
         return render_template('index.html')
     except jwt.ExpiredSignatureError :
-        return redirect("http://localhost:5000/")
+        return redirect("http://localhost:5000/login")
     except jwt.exceptions.DecodeError :
-        return redirect("http://localhost:5000/")
+        return redirect("http://localhost:5000/login")
 
 
 @app.route('/login', methods=['POST'])
@@ -30,9 +30,10 @@ def login() :
     input_data = request.form
     user_id = input_data['id']
     user_pw = input_data['pw']
+    db_user = db.users.find_one({'id' : user_id})
 
     #일치하는 경우
-    if(user_id == ) :
+    if(db_user['pw']==user_pw) :
         payload = {
             'id' : user_id,
             'exp' : datetime.utcnow() + timedelta(minutes=60) #로그인 60분 유지
@@ -52,9 +53,12 @@ def sign_up() :
     user_name = input_data['name']
     user_phone_number = input_data['phone_number']
 
-    quests_user = {'id' : user_id, 'pw': user_pw}
-    db.quests_users.insert_one(quests_user)
-
+    if db.users.find_one({'id':user_id}) == None :
+        quests_user = {'id' : user_id, 'pw': user_pw}
+        db.quests_users.insert_one(quests_user)
+        return jsonify({'result' : 'success'})
+    else :
+        return jsonify({'result' : 'fail'})
     
 
 @app.route('/main', methods=['POST'])
@@ -82,8 +86,10 @@ def post_quests():
         id = title + str(random.randint(0, 9999))
         overlap = db.quests.find({'id':id})
 
-    quest = {'id' : id, 'title': title, 'content': content, 'like': like_default, 'hate': hate_default}
+    writer = request.form['user_id']
+    quest = {'id' : id, 'writer' : writer, 'title': title, 'content': content, 'like': like_default, 'hate': hate_default}
     db.quests.insert_one(quest)
+    db.users.update_one=({'id' : writer}, {'$set':{id : 0}})
 
     return jsonify({'result': 'success'})
 

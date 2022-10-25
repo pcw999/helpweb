@@ -13,4 +13,6 @@ db = client.dbjungle
 name = "2krlhuhh0dkf"
 status = 1
 
-db.test.update_one({'2krlhuhh0dkf' : 1}, {'$set':{'name':'asdf'}})
+a = db.test.find_one({'id' : 'name'})
+
+print(a)
