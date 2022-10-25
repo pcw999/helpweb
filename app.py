@@ -3,6 +3,7 @@ from pymongo import MongoClient
 from datetime import datetime, timedelta
 import json
 import jwt
+import random
 
 SECRET_KEY = 'jungle'
 
@@ -48,9 +49,11 @@ def sign_up() :
     input_data = request.form
     user_id = input_data['id']
     user_pw = input_data['pw']
+    user_name = input_data['name']
+    user_phone_number = input_data['phone_number']
 
-    memos = {'id' : id, 'title': title, 'content': content, 'like': like_default}
-    db.memos.insert_one(memos)
+    quests_user = {'id' : user_id, 'pw': user_pw}
+    db.quests_users.insert_one(quests_user)
 
     
 
@@ -77,17 +80,29 @@ def post_quests():
     overlap = False
     while not overlap :
         id = title + str(random.randint(0, 9999))
-        overlap = db.memos.find({'id':id})
+        overlap = db.quests.find({'id':id})
 
-    memos = {'id' : id, 'title': title, 'content': content, 'like': like_default}
-    db.memos.insert_one(memos)
+    quest = {'id' : id, 'title': title, 'content': content, 'like': like_default, 'hate': hate_default}
+    db.quests.insert_one(quest)
 
     return jsonify({'result': 'success'})
 
 @app.route('/api/like', methods=['POST'])
 def api_like() :
-    id_receive = request.form['id_receive']
-    quest = db.quests.find_one({'id':id_receive})
+    user_id_receive = request.form['user_id_receive']
+    quest_id_receive = request.form['quest_id_receive']
+    quest = db.quests.find_one({'id':quest_id_receive})
+    user = db.users.find_one({'id':user_id_receive})
+
+    try :
+        if user[quest_id_receive] == 0 :
+            db.users.update_one({'id' : quest[id]}, {'$set':{quest[id]:1}})
+            like_up = quest['like'] + 1
+            db.quests.update_one({'like':like_up})
+    except :
+        print('이미 좋아요')
+            
+
     new_like = quest['like']+1
     db.quest.update_one({'id':id_receive},{'$set':{'like':new_like}})
     return jsonify({'result': 'success'})
