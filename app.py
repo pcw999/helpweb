@@ -14,6 +14,7 @@ db = client.dbjungle
 
 @app.route('/')
 def home():
+    #토큰 받기
     token_receive = request.cookies.get('mytoken')
     try :
         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
@@ -46,7 +47,7 @@ def login() :
 
 @app.sign_up('/sign_up', methods=['POST'])
 def sign_up() :
-    # id, pw 받기
+    # 정보 받기
     input_data = request.form
     user_id = input_data['id']
     user_pw = input_data['pw']
@@ -63,7 +64,11 @@ def sign_up() :
 
 @app.route('/main', methods=['POST'])
 def show_quests():
-    sort = request.form
+    id = request.form['user_id']
+    sort = request.form['sort']
+
+    user = db.users.find_one({'id':id}, {'_id':False})
+    if user[]
     if(sort==0) :
         quest = list(db.quests.find({}, {'_id':False}).sort('like', -1))
     elif(sort==1) :
