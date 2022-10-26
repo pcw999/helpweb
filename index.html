@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+      integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l"
+      crossorigin="anonymous"
+    />
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery and Bootstrap Bundle (includes Popper) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns"
+      crossorigin="anonymous"
+    ></script>
+
+    <!-- 구글폰트 -->
+    <link
+      href="https://fonts.googleapis.com/css?family=Stylish&display=swap"
+      rel="stylesheet"
+    />
+
+    <title>크래프톤 정글 | 도와줘요 정글</title>
+
+    <style>
+      #post-box {
+        width: 500px;
+        margin: 20px auto;
+        padding: 20px;
+        border: black solid;
+        border-radius: 5px;
+      }
+
+      .wrap {
+        width: max-content;
+        margin: 10px auto;
+      }
+      .container {
+        margin-left: 30px;
+      }
+
+      .who-now {
+        float: right;
+      }
+    </style>
+
+    <script>
+      $(document).ready(function () {
+        // $(".quest-list").html("");
+        whoIsNow();
+        showQuests();
+      });
+
+      function whoIsNow() {
+        $.ajax({
+          type: "GET",
+          url: "/api/who",
+          data: {},
+          success: function (response) {
+            let user = response["userId"];
+            $(".who-now").html(`${user}님`);
+          },
+        });
+      }
+
+      function showQuests() {
+        $.ajax({
+          type: "GET",
+          url: "/quest",
+          data: {},
+          success: function (response) {
+            let quests = response["quests"];
+            console.log(quests);
+            whoIsNow();
+          },
+          // makeCard
+        });
+      }
+
+      //카드 만들때 headingOne two에 cnt값을 증가시켜서 id지정해야겠다
+      function makeCard(
+        questId,
+        writerInfo,
+        title,
+        date,
+        content,
+        good,
+        bad,
+        attention,
+        reward
+      ) {
+        writerName = writerInfo["name"];
+        writerCall = writerInfo["call"];
+        writerId = writerInfo["id"];
+        let tempHtml = `<div class="card" id="${questId}@${userId}">
+          <div class="card-header" id="headingOne">
+            <h2 class="mb-0">
+              <button
+              class="btn btn-link btn-block text-left"
+                type="button"
+                data-toggle="collapse"
+                data-target="#collapseOne"
+                aria-expanded="true"
+                aria-controls="collapseOne"
+              >
+              <div class="wrap" id="title">
+                <span>${title}</span>
+                </div>
+              </button>
+              <div class="wrap" id="reward">
+                <p>보상 : ${reward}</p>
+                <span class="btn btn-primary" href="#" role="button">좋아요${good}</span>
+                <span class="btn btn-primary" href="#" role="button">아쉬워요${bad}</span>
+              </div>
+              <span class="date">${date}</span>
+              <button class="float-right" href="#" role="button">관심${attention}</button>
+              </div>
+            </h2>
+          </div>
+        </div>
+        <div
+          id="collapseOne"
+          class="collapse show"
+          aria-labelledby="headingOne"
+          data-parent="#accordionExample"
+        >
+          <div class="card-body">
+            <div class="container">
+                <div class="row">
+                  <div class="col-7">
+                    ${content}
+                  </div>
+                  <div id="details" class="col-3">
+                    <div class="card">
+                        <div class="card-header" id="headingTwo">
+                          <h2 class="mb-0">
+                            <button
+                              class="btn btn-link btn-block text-left collapsed"
+                              type="button"
+                              data-toggle="collapse"
+                              data-target="#collapseCnt"
+                              aria-expanded="false"
+                              aria-controls="collapseCnt"
+                            >
+                              Contact
+                            </button>
+                          </h2>
+                        </div>
+                        <div
+                          id="collapseCnt"
+                          class="collapse"
+                          aria-labelledby="headingCnt"
+                          data-parent="#accordionExample"
+                        >
+                          <div class="card-body">
+                            <p>${userName}</p>
+                            ${userCall}
+                          </div>
+                        </div>
+                      </div>
+                  </div>
+                </div>
+          </div>
+        </div>
+      </div>
+        
+        `;
+
+        $(".quest-list").append(tempHtml);
+      }
+
+      function openWrite() {
+        // id 값 post-box의 display 값이 block 이면(= 눈에 보이면)
+        if ($("#post-box").css("display") == "block") {
+          // post-box를 가리고
+          $("#post-box").hide();
+          // 다시 버튼을 클릭하면, 박스 열기를 할 수 있게 텍스트 바꿔두기
+        } else {
+          // 아니면(눈에 보이지 않으면) post-box를 펴라
+          $("#post-box").show();
+          // 다시 버튼을 클릭하면, 박스 닫기를 할 수 있게 텍스트 바꿔두기
+        }
+        whoIsNow();
+      }
+
+      function postQuest() {
+        whoIsNow();
+        let title = $("#quest-title").val();
+        let content = $("#quest-content").val();
+        let reward = $("#quest-reward").val();
+        let userId = $(".who-now").val(); //유저아이디.. 어떻게
+        // 2. memo에 POST 방식으로 메모 생성 요청하기
+        $.ajax({
+          type: "POST", // POST 방식으로 요청하겠다.
+          url: "/quest", // /memo라는 url에 요청하겠다.
+          data: {
+            title_give: title,
+            content_give: content,
+            writerId_give: userId,
+            reward_give: reward,
+          }, // 데이터를 주는 방법
+          success: function (response) {
+            // 성공하면
+            if (response["result"] == "success") {
+              alert("포스팅 성공!");
+              // 3. 성공 시 페이지 새로고침하기
+              window.location.reload();
+            } else {
+              alert("서버 오류!");
+            }
+          },
+        });
+      }
+
+      function questGood(userId, questId) {
+        $.ajax({
+          type: "POST", // POST 방식으로 요청하겠다.
+          url: "/api/good", // /memo라는 url에 요청하겠다.
+          data: { writerId_give: userId, questId_give: questId }, // 데이터를 주는 방법
+          success: function (response) {
+            // 성공하면
+            if (response["result"] == "success") {
+              alert("포스팅 성공!");
+              // 3. 성공 시 페이지 새로고침하기
+              window.location.reload();
+            } else {
+              alert("서버 오류!");
+            }
+          },
+        });
+      }
+      // 인자로 넣던지 id값을 알아내던지  후자로해보자
+      function questBad(userId, questId) {
+        $.ajax({
+          type: "POST", // POST 방식으로 요청하겠다.
+          url: "/api/bad", // /memo라는 url에 요청하겠다.
+          data: { writerId_give: userId, questId_give: questId }, // 데이터를 주는 방법
+          success: function (response) {
+            // 성공하면
+            if (response["result"] == "success") {
+              alert("포스팅 성공!");
+              // 3. 성공 시 페이지 새로고침하기
+              window.location.reload();
+            } else {
+              alert("서버 오류!");
+            }
+          },
+        });
+      }
+
+      function questAttention(userId, questId) {
+        $.ajax({
+          type: "POST", // POST 방식으로 요청하겠다.
+          url: "/api/attention", // /memo라는 url에 요청하겠다.
+          data: { writerId_give: userId, questId_give: questId }, // 데이터를 주는 방법
+          success: function (response) {
+            // 성공하면
+            if (response["result"] == "success") {
+              alert("포스팅 성공!");
+              // 3. 성공 시 페이지 새로고침하기
+              window.location.reload();
+            } else {
+              alert("서버 오류!");
+            }
+          },
+        });
+      }
+    </script>
+  </head>
+
+  <body>
+    <div class="jumbotron">
+      <div>
+        <span class="btn btn-primary btn-lg" href="#" role="button"
+          >보상기준</span
+        >
+        <span class="who-now">fajskdfj님</span>
+      </div>
+      <h1 class="display-4">도와줘요 정글</h1>
+      <hr class="my-4" />
+      <a
+        onclick="openWrite()"
+        class="btn btn-primary btn-lg"
+        href="#"
+        role="button"
+        >글 작성</a
+      >
+    </div>
+
+    <div id="post-box" class="form-post" style="display: none">
+      <div>
+        <div class="form-group">
+          <label for="post-url">요청사항</label>
+          <input id="quest-title" class="form-control" placeholder="" />
+        </div>
+        <div class="form-group">
+          <label for="post-comment">세부 내용</label>
+          <textarea id="quest-content" class="form-control" rows="4"></textarea>
+          <div class="form-group">
+            <label for="quest-reward">보상</label>
+            <input id="quest-reward" placeholder="" />
+          </div>
+        </div>
+        <div class="form-group"></div>
+        <button type="button" class="btn btn-primary" onclick="postQuest()">
+          작성 완료
+        </button>
+      </div>
+    </div>
+
+    <div class="quest-list" id="accordionExample">
+      <div class="card">
+        <div class="card-header" id="headingOne">
+          <h2 class="mb-0">
+            <button
+              class="btn btn-link btn-block text-left"
+              type="button"
+              data-toggle="collapse"
+              data-target="#collapseOne"
+              aria-expanded="true"
+              aria-controls="collapseOne"
+            >
+              Collapsible Group Item #1
+            </button>
+          </h2>
+        </div>
+
+        <div
+          id="collapseOne"
+          class="collapse show"
+          aria-labelledby="headingOne"
+          data-parent="#accordionExample"
+        >
+          <div class="card-body">
+            <div class="accordion" id="accordionCnt1">
+              <div class="container">
+                <div class="row">
+                  <div class="col-8">col-8</div>
+                  <div class="col-4">
+                    <div class="card">
+                      <div class="card-header" id="headingOne">
+                        <h2 class="mb-0">
+                          <button
+                            class="btn btn-link btn-block text-left"
+                            type="button"
+                            data-toggle="collapse"
+                            data-target="#collapseCnt1"
+                            aria-expanded="true"
+                            aria-controls="collapseOne"
+                          >
+                            Contact
+                          </button>
+                        </h2>
+                      </div>
+
+                      <div
+                        id="collapseCnt1"
+                        class="collapse show"
+                        aria-labelledby="headingOne"
+                        data-parent="#accordionCnt1"
+                      >
+                        <div class="card-body">
+                          <a class="writer-name">홍길동</a>
+                          <a class="writer-call">010-0000-1231</a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header" id="headingTwo">
+          <h2 class="mb-0">
+            <button
+              class="btn btn-link btn-block text-left collapsed"
+              type="button"
+              data-toggle="collapse"
+              data-target="#collapseTwo"
+              aria-expanded="false"
+              aria-controls="collapseTwo"
+            >
+              Collapsible Group Item #2
+            </button>
+          </h2>
+        </div>
+        <div
+          id="collapseTwo"
+          class="collapse"
+          aria-labelledby="headingTwo"
+          data-parent="#accordionExample"
+        >
+          <div class="card-body">
+            Some placeholder content for the second accordion panel. This panel
+            is hidden by default.
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header" id="headingThree">
+          <h2 class="mb-0">
+            <button
+              class="btn btn-link btn-block text-left collapsed"
+              type="button"
+              data-toggle="collapse"
+              data-target="#collapseThree"
+              aria-expanded="false"
+              aria-controls="collapseThree"
+            >
+              Collapsible Group Item #3
+            </button>
+          </h2>
+        </div>
+        <div
+          id="collapseThree"
+          class="collapse"
+          aria-labelledby="headingThree"
+          data-parent="#accordionExample"
+        >
+          <div class="card-body">
+            And lastly, the placeholder content for the third and final
+            accordion panel. This panel is hidden by default.
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
