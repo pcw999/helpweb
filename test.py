@@ -13,6 +13,9 @@
 # name = "2krlhuhh0dkf"
 # status = 1
 
-# a = db.test.find_one({'id' : 'name'})
+# #db.test.update_one({'name' : 'asdf'}, {'$set':{'list':'1'}})
 
-# print(a)
+# temp = db.test.find_one({'name':'asdf'})
+# temp2 = list(temp['list'])
+# temp2.append(3)
+# db.test.update_one({'name' : 'asdf'}, {'$set':{'list':temp2}})
