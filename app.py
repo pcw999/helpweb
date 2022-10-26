@@ -14,52 +14,56 @@ db = client.dbjungle
 
 @app.route('/login')
 def home():
-    #토큰 받기
-    token_receive = request.cookies.get('mytoken')
-    try :
-        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
-        return render_template('index.html')
-    except jwt.ExpiredSignatureError :
-        return redirect("http://localhost:5000/login")
-    except jwt.exceptions.DecodeError :
-        return redirect("http://localhost:5000/login")
+    return render_template('login.html')
+    # #토큰 받기
+    # token_receive = request.cookies.get('mytoken')
+    # try :
+    #     payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+    #     return render_template('index.html')
+    # except jwt.ExpiredSignatureError :
+    #     return redirect("http://localhost:5000/login")
+    # except jwt.exceptions.DecodeError :
+    #     return redirect("http://localhost:5000/login")
+
+@app.route('/index')
+def go_index() :
+    return render_template('index.html')    
 
 
 @app.route('/login', methods=['POST'])
 def login() :
     # id, pw 받기
-    input_data = request.form
-    user_id = input_data['id']
-    user_pw = input_data['pw']
-    db_user = db.users.find_one({'id' : user_id})
+    id_receive = request.form['id_give']
+    pw_receive = request.form['pw_give']
+    db_user = db.users.find_one({'id' : id_receive})
 
     #일치하는 경우
-    if(db_user['pw']==user_pw) :
-        payload = {
-            'id' : user_id,
-            'exp' : datetime.utcnow() + timedelta(minutes=60) #로그인 60분 유지
-        }
-        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
-        return jsonify({'result' : 'success', 'token' : token})
-
+    if(db_user['pw']==pw_receive) :
+        # payload = {
+        #     'id' : user_id,
+        #     'exp' : datetime.utcnow() + timedelta(minutes=60) #로그인 60분 유지
+        # }
+        # token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+        # return jsonify({'result' : 'success', 'token' : token})
+        return jsonify({'result' : 'success'})
     else :
+        # return render_template('index.html')
         return jsonify({'result' : 'fail'})
 
-@app.sign_up('/sign_up', methods=['POST'])
+@app.route('/sign_up', methods=['POST'])
 def sign_up() :
     # 정보 받기
-    input_data = request.form
-    user_id = input_data['id']
-    user_pw = input_data['pw']
-    user_name = input_data['name']
-    user_phone_number = input_data['phone_number']
-    user_like_list = []
-    user_hate_list = []
-    user_star_list = []
+    id_receive = request.form['id_give']
+    pw_receive = request.form['pw_give']
+    name_receive = request.form['name_give']
+    phone_receive = request.form['phone_give']
+    like_list = []
+    hate_list = []
+    star_list = []
 
-    if db.users.find_one({'id':user_id}) == None :
-        quests_user = {'id' : user_id, 'pw': user_pw, 'name': user_name, 'phone_number': user_pw, 'like_list': user_pw, 'hate_list': user_pw, 'star_list': user_pw}
-        db.users.insert_one(quests_user)
+    if db.users.find_one({'id':id_receive}) == None :
+        new_user = {'id' : id_receive, 'pw': pw_receive, 'name': name_receive, 'phone':phone_receive, 'likelist':like_list, 'hatelist':hate_list, 'starlist':star_list}
+        db.users.insert_one(new_user)
         return jsonify({'result' : 'success'})
     else :
         return jsonify({'result' : 'fail'})
@@ -94,7 +98,7 @@ def show_quests():
 
     quest.reverse()
 
-    return jsonify({'result': 'success', 'quests_list': quest})
+#     return jsonify({'result': 'success', 'quests_list': quest})
 
 @app.route('/main', methods=['POST'])
 def post_quests():
@@ -114,7 +118,7 @@ def post_quests():
     quest = {'id' : id, 'writer' : user_id, 'title': title, 'content': content, 'like': like_default, 'hate': hate_default, 'star': star_default, 'treasure' : treasure, 'date': date}
     db.quests.insert_one(quest)
 
-    return jsonify({'result': 'success'})
+#     return jsonify({'result': 'success'})
 
 @app.route('/api/like', methods=['POST'])
 def api_like() :
@@ -182,11 +186,11 @@ def api_hate() :
     else :
         return jsonify({'result': 'fail'})  
 
-@app.route('/api/delete', methods=['POST'])
-def api_delete() :
-    id_receive = request.form['id_receive']
-    db.quests.delete_one({'id':id_receive})
-    return jsonify({'result': 'success'})
+# @app.route('/api/delete', methods=['POST'])
+# def api_delete() :
+#     id_receive = request.form['id_receive']
+#     db.quests.delete_one({'id':id_receive})
+#     return jsonify({'result': 'success'})
 
 @app.route('/api/edit', methods=['POST'])
 def api_edit() :
