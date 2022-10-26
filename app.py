@@ -98,7 +98,7 @@ def show_quests():
 
     quest.reverse()
 
-#     return jsonify({'result': 'success', 'quests_list': quest})
+    return jsonify({'result': 'success', 'quests_list': quest})
 
 @app.route('/main', methods=['POST'])
 def post_quests():
@@ -118,7 +118,7 @@ def post_quests():
     quest = {'id' : id, 'writer' : user_id, 'title': title, 'content': content, 'like': like_default, 'hate': hate_default, 'star': star_default, 'treasure' : treasure, 'date': date}
     db.quests.insert_one(quest)
 
-#     return jsonify({'result': 'success'})
+    return jsonify({'result': 'success'})
 
 @app.route('/api/like', methods=['POST'])
 def api_like() :
@@ -186,11 +186,11 @@ def api_hate() :
     else :
         return jsonify({'result': 'fail'})  
 
-# @app.route('/api/delete', methods=['POST'])
-# def api_delete() :
-#     id_receive = request.form['id_receive']
-#     db.quests.delete_one({'id':id_receive})
-#     return jsonify({'result': 'success'})
+@app.route('/api/delete', methods=['POST'])
+def api_delete() :
+    id_receive = request.form['id_receive']
+    db.quests.delete_one({'id':id_receive})
+    return jsonify({'result': 'success'})
 
 @app.route('/api/edit', methods=['POST'])
 def api_edit() :
